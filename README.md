@@ -87,10 +87,11 @@ You need to connect the CLI to your Orchestrate instance.
 **Add and activate the environment:**
 ```bash
 # Add your environment
-orchestrate env add <env-name> --api-key <your-api-key> --url <your-instance-url>
+orchestrate env add -n <env-name> -u <your-instance-url>
 
 # Activate it
 orchestrate env activate <env-name>
+# enter your wxo apikey when prompted 
 
 # Verify connection
 orchestrate agents list
@@ -208,20 +209,23 @@ GOOGLE_API_KEY=...
 After completing setup above:
 
 ```bash
-# 1. Install Python dependencies
+
+# Install Python dependencies
 pip install -r requirements.txt
 
-# 2. Load credentials
+# Run the stand-alone tool tests to verify our credentials are working properly 
+python tests/standalone_test.py
+
+# Load credentials
 source .env.credentials
 
-# 3. Deploy tools and Data Coordinator
+# Deploy tools and Data Coordinator
 ./import-all.sh
 
-# 4. Create Production Assistant in UI
+# Create Production Assistant in UI
 # See collaborator.md for step-by-step guide
 
-# 5. Test the collaboration
-orchestrate chat start gcsc_ProductionAssistant
+
 ```
 
 ---
@@ -309,10 +313,6 @@ orchestrate/
 
 ### Data Coordinator
 
-```bash
-orchestrate chat start gcsc_DataCoordinator
-```
-
 ```
 "What scenes are scheduled for the next 2 days?"
 "Search for Canon cameras"
@@ -321,10 +321,6 @@ orchestrate chat start gcsc_DataCoordinator
 ```
 
 ### Production Assistant
-
-```bash
-orchestrate chat start gcsc_ProductionAssistant
-```
 
 ```
 "Check the schedule and tell me what equipment is needed"

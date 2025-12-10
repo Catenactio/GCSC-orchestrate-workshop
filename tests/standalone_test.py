@@ -6,8 +6,19 @@ Tests the 7 tools:
 - Communications: post_briefing, send_approval_request, place_order
 """
 import os
+import sys
 from datetime import datetime, timedelta
+from enum import Enum
 from dotenv import load_dotenv
+
+
+class TestResult(Enum):
+    """Test result status"""
+    PASSED = "passed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
+
 from notion_client import Client as NotionClient
 from pyairtable import Api as AirtableApi
 from slack_sdk import WebClient
@@ -32,8 +43,8 @@ def test_get_schedule():
     database_id = os.getenv('NOTION_DATABASE_UUID')
 
     if not token or not database_id:
-        print("Missing Notion credentials")
-        return None
+        print("⚠️  SKIPPED: Missing Notion credentials")
+        return TestResult.SKIPPED
 
     notion = NotionClient(auth=token)
     today = datetime.now().date()
@@ -79,11 +90,12 @@ def test_get_schedule():
                 preview = scene['script_breakdown'][:80] + "..." if len(scene['script_breakdown']) > 80 else scene['script_breakdown']
                 print(f"    Script: {preview}")
 
-        return scenes
+        print("✅ PASSED")
+        return TestResult.PASSED
 
     except Exception as e:
-        print(f"Error: {e}")
-        return None
+        print(f"❌ FAILED: {e}")
+        return TestResult.FAILED
 
 
 def test_search_inventory():
@@ -94,14 +106,15 @@ def test_search_inventory():
     base_id = os.getenv('AIRTABLE_INVENTORY_BASE_ID')
 
     if not token or not base_id:
-        print("Missing Airtable credentials")
-        return
+        print("⚠️  SKIPPED: Missing Airtable credentials")
+        return TestResult.SKIPPED
 
     airtable_api = AirtableApi(token)
     table = airtable_api.table(base_id, "Assets")
 
     # Test searches
     test_queries = ["Canon", "Sony", "Microphone"]
+    errors = []
 
     for query in test_queries:
         try:
@@ -119,7 +132,15 @@ def test_search_inventory():
                 print(f"    {name} - {qty} units @ ${rate}/day")
 
         except Exception as e:
-            print(f"  Error: {e}")
+            print(f"  Error searching '{query}': {e}")
+            errors.append(f"{query}: {e}")
+
+    if errors:
+        print(f"\n❌ FAILED: {len(errors)} search(es) failed")
+        return TestResult.FAILED
+
+    print("\n✅ PASSED")
+    return TestResult.PASSED
 
 
 def test_check_availability():
@@ -130,8 +151,8 @@ def test_check_availability():
     base_id = os.getenv('AIRTABLE_INVENTORY_BASE_ID')
 
     if not token or not base_id:
-        print("Missing Airtable credentials")
-        return
+        print("⚠️  SKIPPED: Missing Airtable credentials")
+        return TestResult.SKIPPED
 
     airtable_api = AirtableApi(token)
     assets_table = airtable_api.table(base_id, "Assets")
@@ -140,6 +161,7 @@ def test_check_availability():
     # Test with a sample asset
     test_date = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
     test_assets = ["Canon EOS 5D Mark IV", "Sony Venice"]
+    errors = []
 
     for asset_name in test_assets:
         try:
@@ -174,10 +196,18 @@ def test_check_availability():
             print(f"  Reserved: {reserved}")
             print(f"  Available: {available}")
             print(f"  Daily rate: ${daily_rate}")
-            print(f"  Status: {'✅ Available' if available > 0 else '❌ Not available'}")
+            print(f"  Status: {'Available' if available > 0 else 'Not available'}")
 
         except Exception as e:
-            print(f"  Error: {e}")
+            print(f"  Error checking '{asset_name}': {e}")
+            errors.append(f"{asset_name}: {e}")
+
+    if errors:
+        print(f"\n❌ FAILED: {len(errors)} availability check(s) failed")
+        return TestResult.FAILED
+
+    print("\n✅ PASSED")
+    return TestResult.PASSED
 
 
 def test_create_reservation():
@@ -189,8 +219,8 @@ def test_create_reservation():
     notion_token = os.getenv('NOTION_INTEGARTION_SECRET')
 
     if not all([airtable_token, airtable_base_id, notion_token]):
-        print("Missing credentials")
-        return
+        print("⚠️  SKIPPED: Missing credentials")
+        return TestResult.SKIPPED
 
     airtable_api = AirtableApi(airtable_token)
     assets_table = airtable_api.table(airtable_base_id, "Assets")
@@ -217,15 +247,19 @@ def test_create_reservation():
             "Status": "Confirmed"
         })
 
-        print(f"  ✅ Allocation created: {allocation['id']}")
+        print(f"  Allocation created: {allocation['id']}")
         print(f"  Cost: ${daily_rate * 1:.2f}")
 
         # Clean up
         allocations_table.delete(allocation['id'])
-        print(f"  🗑️  Test allocation deleted")
+        print(f"  Test allocation deleted")
+
+        print("✅ PASSED")
+        return TestResult.PASSED
 
     except Exception as e:
-        print(f"  Error: {e}")
+        print(f"❌ FAILED: {e}")
+        return TestResult.FAILED
 
 
 def test_post_briefing():
@@ -236,16 +270,16 @@ def test_post_briefing():
     channel_id = os.getenv('SLACK_CHANNEL_ID', 'C09UGCHJJUT')
 
     if not token:
-        print("Missing SLACK_BOT_TOKEN")
-        return
+        print("⚠️  SKIPPED: Missing SLACK_BOT_TOKEN")
+        return TestResult.SKIPPED
 
     slack_client = WebClient(token=token)
 
     message = (
-        "📋 *Equipment Status Update*\n\n"
+        "*Equipment Status Update*\n\n"
         "Scene 12 - December 9, 2025\n"
-        "• Canon EOS 5D Mark IV (2 units) - ✅ Available\n"
-        "• Sony Venice (1 unit) - ✅ Available\n\n"
+        "* Canon EOS 5D Mark IV (2 units) - Available\n"
+        "* Sony Venice (1 unit) - Available\n\n"
         "Total estimated cost: $590.00"
     )
 
@@ -274,12 +308,15 @@ def test_post_briefing():
             blocks=blocks
         )
 
-        print(f"✅ Briefing posted to Slack")
+        print(f"Briefing posted to Slack")
         print(f"  Channel: {response['channel']}")
         print(f"  Timestamp: {response['ts']}")
+        print("✅ PASSED")
+        return TestResult.PASSED
 
     except SlackApiError as e:
-        print(f"Error: {e.response['error']}")
+        print(f"❌ FAILED: {e.response['error']}")
+        return TestResult.FAILED
 
 
 def test_send_approval_request():
@@ -290,8 +327,8 @@ def test_send_approval_request():
     channel_id = os.getenv('SLACK_CHANNEL_ID', 'C09UGCHJJUT')
 
     if not token:
-        print("Missing SLACK_BOT_TOKEN")
-        return
+        print("⚠️  SKIPPED: Missing SLACK_BOT_TOKEN")
+        return TestResult.SKIPPED
 
     slack_client = WebClient(token=token)
 
@@ -340,64 +377,111 @@ def test_send_approval_request():
             blocks=blocks
         )
 
-        print(f"✅ Approval request sent")
+        print(f"Approval request sent")
         print(f"  Channel: {response['channel']}")
         print(f"  Timestamp: {response['ts']}")
+        print("✅ PASSED")
+        return TestResult.PASSED
 
     except SlackApiError as e:
-        print(f"Error: {e.response['error']}")
+        print(f"❌ FAILED: {e.response['error']}")
+        return TestResult.FAILED
 
 
 def test_place_order():
     """Test place_order tool (mock)"""
     print_section("TEST: place_order")
 
-    # Mock order details
-    item_name = "Canon EOS 5D Mark IV"
-    quantity = 2
-    unit_cost = 45.00
-    total_cost = unit_cost * quantity
+    try:
+        # Mock order details
+        item_name = "Canon EOS 5D Mark IV"
+        quantity = 2
+        unit_cost = 45.00
+        total_cost = unit_cost * quantity
 
-    # Generate mock order ID
-    order_id = f"PO-{datetime.now().strftime('%Y%m%d')}-{abs(hash(item_name)) % 10000:04d}"
-    estimated_delivery = (datetime.now() + timedelta(days=2)).strftime("%Y-%m-%d")
+        # Generate mock order ID
+        order_id = f"PO-{datetime.now().strftime('%Y%m%d')}-{abs(hash(item_name)) % 10000:04d}"
+        estimated_delivery = (datetime.now() + timedelta(days=2)).strftime("%Y-%m-%d")
 
-    print(f"Placing order:")
-    print(f"  Item: {item_name}")
-    print(f"  Quantity: {quantity}")
-    print(f"  Unit cost: ${unit_cost}")
-    print(f"  Total: ${total_cost}")
-    print(f"\n✅ Order placed successfully!")
-    print(f"  Order ID: {order_id}")
-    print(f"  Vendor: Production Supply Co.")
-    print(f"  Estimated delivery: {estimated_delivery}")
+        print(f"Placing order:")
+        print(f"  Item: {item_name}")
+        print(f"  Quantity: {quantity}")
+        print(f"  Unit cost: ${unit_cost}")
+        print(f"  Total: ${total_cost}")
+        print(f"\nOrder placed successfully!")
+        print(f"  Order ID: {order_id}")
+        print(f"  Vendor: Production Supply Co.")
+        print(f"  Estimated delivery: {estimated_delivery}")
+
+        print("✅ PASSED")
+        return TestResult.PASSED
+
+    except Exception as e:
+        print(f"❌ FAILED: {e}")
+        return TestResult.FAILED
 
 
 if __name__ == "__main__":
     print("\n" + "="*60)
-    print("🎬 Standalone Test - Simplified Two-Agent Workshop")
+    print("Standalone Test - Simplified Two-Agent Workshop")
     print("="*60)
     print("Testing 7 tools for the two-agent collaboration system")
     print("="*60)
 
+    # Track results
+    results = {}
+
     # Data Tools
-    print("\n🔷 DATA TOOLS")
-    scenes = test_get_schedule()
-    test_search_inventory()
-    test_check_availability()
-    test_create_reservation()
+    print("\n--- DATA TOOLS ---")
+    results["get_schedule"] = test_get_schedule()
+    results["search_inventory"] = test_search_inventory()
+    results["check_availability"] = test_check_availability()
+    results["create_reservation"] = test_create_reservation()
 
     # Communication Tools
-    print("\n🔷 COMMUNICATION TOOLS")
-    test_post_briefing()
-    test_send_approval_request()
-    test_place_order()
+    print("\n--- COMMUNICATION TOOLS ---")
+    results["post_briefing"] = test_post_briefing()
+    results["send_approval_request"] = test_send_approval_request()
+    results["place_order"] = test_place_order()
+
+    # Summary
+    print("\n" + "="*60)
+    print("  TEST SUMMARY")
+    print("="*60)
+
+    passed = [name for name, result in results.items() if result == TestResult.PASSED]
+    failed = [name for name, result in results.items() if result == TestResult.FAILED]
+    skipped = [name for name, result in results.items() if result == TestResult.SKIPPED]
+
+    print(f"\n  Passed:  {len(passed)}")
+    print(f"  Failed:  {len(failed)}")
+    print(f"  Skipped: {len(skipped)}")
+
+    if failed:
+        print(f"\n  Failed tests:")
+        for name in failed:
+            print(f"    - {name}")
+
+    if skipped:
+        print(f"\n  Skipped tests (missing credentials):")
+        for name in skipped:
+            print(f"    - {name}")
 
     print("\n" + "="*60)
-    print("✅ All tests complete!")
-    print("="*60)
-    print("\nNext steps:")
-    print("  1. Run ./import-all.sh to deploy tools")
-    print("  2. Create Production Assistant in UI (see collaborator.md)")
-    print("  3. Test: orchestrate chat start gcsc_ProductionAssistant")
-    print()
+    if failed:
+        print("❌ TESTS FAILED")
+        print("="*60)
+        sys.exit(1)
+    elif skipped and not passed:
+        print("⚠️  ALL TESTS SKIPPED")
+        print("="*60)
+        sys.exit(1)
+    else:
+        print("✅ ALL TESTS PASSED")
+        print("="*60)
+        print("\nNext steps:")
+        print("  1. Run ./import-all.sh to deploy tools")
+        print("  2. Create Production Assistant in UI (see collaborator.md)")
+        print("  3. Test: orchestrate chat start gcsc_ProductionAssistant")
+        print()
+        sys.exit(0)

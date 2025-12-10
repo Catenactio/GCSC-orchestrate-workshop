@@ -82,3 +82,7 @@ tools:
   - create_reservation
 
 collaborators: []
+
+welcome_content:
+  welcome_message: "Hello, I'm the Data Coordinator. Welcome to watsonx Orchestrate!"
+  description: "How can I help you today?"
