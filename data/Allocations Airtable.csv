@@ -1,0 +1,14 @@
+﻿Reservation ID,Asset Link,Scene Ref,Start Date,Quantity Reserved,Status
+SCN-001-Canon EOS 5D Mark IV,Canon EOS 5D Mark IV,SCN-001,7/1/2024,5,Confirmed
+SCN-003-Shure SM7B Microphone,Shure SM7B Microphone,SCN-003,7/3/2024,8,Confirmed
+SCN-006-Epson EB-X41 Projector,Epson EB-X41 Projector,SCN-006,7/6/2024,4,Pending
+SCN-007-Yamaha MG10XU Mixer,Yamaha MG10XU Mixer,SCN-007,7/7/2024,7,Confirmed
+SCN-008-GoPro HERO10 Black,GoPro HERO10 Black,SCN-008,7/8/2024,1,Cancelled
+SCN-010-Dell UltraSharp U2720Q,Dell UltraSharp U2720Q,SCN-010,7/10/2024,3,Pending
+SCN-011-Sennheiser EW 112P G4,Sennheiser EW 112P G4,SCN-011,7/11/2024,5,Confirmed
+SCN-012-HP LaserJet Pro M404dn,HP LaserJet Pro M404dn,SCN-012,7/12/2024,2,Cancelled
+SCN-013-Samsung Galaxy Tab S7,Samsung Galaxy Tab S7,SCN-013,7/13/2024,6,Confirmed
+SCN-014-Canon EF 24-70mm Lens,Canon EF 24-70mm Lens,SCN-014,7/14/2024,4,Pending
+SCN-015-JBL EON610 Speaker,JBL EON610 Speaker,SCN-015,7/15/2024,8,Confirmed
+SCN-012-Blackmagic ATEM Mini Pro,Blackmagic ATEM Mini Pro,SCN-012,3/2/2024,1,Confirmed
+-,,,,,

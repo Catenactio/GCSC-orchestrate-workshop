@@ -1,0 +1,57 @@
+# ===========================================
+# Environment & Credentials (NEVER commit these)
+# ===========================================
+.env
+.env.credentials
+.env.local
+.env.*.local
+.env.orchestrate
+*.pem
+*.key
+
+# ===========================================
+# Python
+# ===========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+ENV/
+
+# ===========================================
+# Testing & Coverage
+# ===========================================
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+# ===========================================
+# IDE & Editors
+# ===========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===========================================
+# Build Artifacts
+# ===========================================
+dist/
+build/
+*.egg-info/
+*.egg
+
+# ===========================================
+# Project-specific
+# ===========================================
+demo_api/

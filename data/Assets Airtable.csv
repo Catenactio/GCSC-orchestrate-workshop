@@ -1,0 +1,17 @@
+﻿Asset Name,SKU,Category,Total Quantity,Daily Rate,Maintenance Status,Allocations
+Canon EOS 5D Mark IV,CAM-001,Camera,8,$45.00,Operational,SCN-001-Canon EOS 5D Mark IV
+DJI Mavic Air 2,DRN-002,Drone,5,$600.00,Operational,
+Shure SM7B Microphone,MIC-003,Audio Equipment,12,$15.00,Operational,SCN-003-Shure SM7B Microphone
+Sony PXW-FS7,CAM-004,Camera,3,$85.00,Under Maintenance,
+"Apple MacBook Pro 16""",LPT-005,Laptop,10,$110.00,Operational,
+Epson EB-X41 Projector,PRJ-006,Projector,7,$30.00,Operational,SCN-006-Epson EB-X41 Projector
+Yamaha MG10XU Mixer,AUD-007,Audio Equipment,4,$20.00,Operational,SCN-007-Yamaha MG10XU Mixer
+GoPro HERO10 Black,CAM-008,Camera,4,$25.00,Operational,SCN-008-GoPro HERO10 Black
+Blackmagic ATEM Mini Pro,VID-009,Video Switcher,2,$40.00,Operational,SCN-012-Blackmagic ATEM Mini Pro
+Dell UltraSharp U2720Q,MON-010,Monitor,6,$18.00,Operational,SCN-010-Dell UltraSharp U2720Q
+Sennheiser EW 112P G4,MIC-011,Audio Equipment,9,$22.00,Operational,SCN-011-Sennheiser EW 112P G4
+HP LaserJet Pro M404dn,PRN-012,Printer,5,$12.00,Operational,SCN-012-HP LaserJet Pro M404dn
+Samsung Galaxy Tab S7,TAB-013,Tablet,8,$17.00,Operational,SCN-013-Samsung Galaxy Tab S7
+Canon EF 24-70mm Lens,LEN-014,Lens,11,$19.00,Operational,SCN-014-Canon EF 24-70mm Lens
+JBL EON610 Speaker,SPK-015,Audio Equipment,6,$28.00,Under Maintenance,SCN-015-JBL EON610 Speaker
+,,,,,,
